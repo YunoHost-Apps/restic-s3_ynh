@@ -1,4 +1,5 @@
-__APP__ ALL = (root) NOPASSWD: /usr/bin/yunohosta app setting __APP__*, /usr/bin/yunohosta backup create*
+__APP__ ALL = (root) NOPASSWD: /usr/bin/yunohost app setting __APP__*, /usr/bin/yunohost backup create*
 __APP__ ALL = (root) NOPASSWD: /bin/journalctl*
 __APP__ ALL = (root) NOPASSWD: /usr/bin/find /etc/yunohost/apps -name backup
-__APP__ ALL = (root) NOPASSWD: __INSTALL_DIR__/check_method,
+__APP__ ALL = (root) NOPASSWD: __INSTALL_DIR__/check_method
+__APP__ ALL = (root) NOPASSWD: /usr/bin/mail*

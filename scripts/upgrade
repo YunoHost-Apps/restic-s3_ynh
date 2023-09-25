@@ -78,6 +78,7 @@ mkdir -p "/var/log/$app"
 chown $app:$app "/var/log/$app"
 
 ynh_add_config --template="../conf/sudoers" --destination="/etc/sudoers.d/$app"
+chown root:root "/etc/sudoers.d/$app"
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
