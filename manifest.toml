@@ -1,0 +1,121 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
+packaging_format = 2
+
+id = "restic-s3"
+name = "Restic with S3"
+description.en = "Backup your server with Restic over an S3 bucket"
+description.fr = "Sauvegardez votre serveur avec Restic vers un S3 bucket"
+
+version = "0.1.0~ynh1"
+
+maintainers = ["Tag"]
+
+[upstream]
+# NB: Only the "license" key is mandatory. Remove entries for which there's no relevant data
+license = "free"
+
+[integration]
+yunohost = ">= 11.1.21"
+architectures = "all"
+multi_instance = false
+
+ldap = "not_relevant"
+sso = "not_relevant"
+
+# FIXME: replace with an **estimate** minimum disk and RAM requirements. e.g. 20M, 400M, 1G...
+disk = "50M"
+ram.build = "50M"
+ram.runtime = "50M"
+
+[install]
+    [install.apps]
+    ask.en = "Lists apps to backup (id)"
+    help.en = "Set to 'all' if you want to backup every apps"
+    type = "tags"
+    default = "all"
+
+    [install.conf]
+    ask.en = "Backup system configuration?"
+    type = "boolean"
+    default = true
+
+    [install.data]
+    ask.en = "Backup system and user data?"
+    type = "boolean"
+    default = true
+
+    [install.endpoint]
+    ask.en = "S3 Endpoint"
+    type = "string"
+    default = "s3.example.org"
+
+    [install.bucket]
+    ask.en = "S3 Bucket"
+    type = "string"
+    default = "backups"
+
+    [install.access_key_id]
+    ask.en = "S3 Access Key ID"
+    help.en = "Also known as AWS_ACCESS_KEY_ID"
+    type = "string"
+    default = "GK..."
+
+    [install.secret_access_key]
+    ask.en = "S3 Secret Access Key"
+    help.en = "Also known as AWS_SECRET_ACCESS_KEY"
+    type = "string"
+
+    [install.passphrase]
+    ask.en = "Encryption passphrase"
+    help.en = "Indicate a strong passphrase, that you will keep preciously if you want to be able to use your backups"
+    type = "password"
+
+    [install.on_calendar]
+    ask.en = "Backup timers"
+    help.en = "Default is on every day at 0:15 AM. See systemd OnCalendar format."
+    type = "string"
+    default = "*-*-* 0:15:00"
+
+    [install.check_on_calendar]
+    ask.en = "Metadata backup check timers"
+    help.en = "Default is on every Saturday exepct the first week of the month, at 3:15 AM. See systemd OnCalendar format."
+    type = "string"
+    default = "Sat *-*-8..31 3:15:00"
+
+    [install.check_read_data_on_calendar]
+    ask.en = "Complete backup check timers"
+    help.en = "Default is on the first Saturday of the month, at 3:15 AM. See systemd OnCalendar format."
+    type = "string"
+    default = "Sat *-*-1..7 3:15:00"
+
+[resources]
+
+    [resources.sources]
+
+        [resources.sources.main]
+        extract = false
+        rename = "restic.bz2"
+
+        i386.url = "https://github.com/restic/restic/releases/download/v0.16.0/restic_0.16.0_linux_386.bz2"
+        i386.sha256 = "ca5a7ecdd5f4a8c6315555fb446496b2085137d6d38e56a0d1318c5e1d80db1a"
+
+        amd64.url = "https://github.com/restic/restic/releases/download/v0.16.0/restic_0.16.0_linux_amd64.bz2"
+        amd64.sha256 = "492387572bb2c4de904fa400636e05492e7200b331335743d46f2f2874150162"
+
+        armhf.url = "https://github.com/restic/restic/releases/download/v0.16.0/restic_0.16.0_linux_arm.bz2"
+        armhf.sha256 = "20d323af78ca61c911fc9558d3621307e6a5beaaa635346bce8b5a6211c6a8f3"
+
+        arm64.url = "https://github.com/restic/restic/releases/download/v0.16.0/restic_0.16.0_linux_arm64.bz2"
+        arm64.sha256 = "434d77b8079a27f303d30758ad99152abf3102095b6bb3573c1de307f1ab6345"
+
+        autoupdate.strategy = "latest_github_release"
+        autoupdate.asset.i386  = ".*.386.bz2"
+        autoupdate.asset.amd64 = ".*.amd64.bz2"
+        autoupdate.asset.armhf = ".*.arm.bz2"
+        autoupdate.asset.arm64 = ".*.arm64.bz2"
+
+    [resources.system_user]
+
+    [resources.install_dir]
+    dir = "/opt/yunohost/__APP__"

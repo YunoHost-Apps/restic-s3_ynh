@@ -1,0 +1,96 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+# Prevent filter_hooks() to fail with
+# ls: cannot access '/etc/yunohost/hooks.d/backup/': No such file or directory
+mkdir -p /etc/yunohost/hooks.d/backup/
+
+#=================================================
+# APP "BUILD" (DEPLOYING SOURCES, VENV, COMPILING ETC)
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression --message="Setting up source files..." --weight=1
+
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$install_dir"
+bunzip2 $install_dir/restic.bz2
+
+chmod u+x $install_dir/restic
+
+#=================================================
+# SETUP SCRIPTS
+#=================================================
+ynh_script_progression --message="Setting up scripts..." --weight=1
+
+mkdir -p /etc/yunohost/hooks.d/backup_method
+ynh_add_config --template="../conf/backup_method" --destination="/etc/yunohost/hooks.d/backup_method/05-$app"
+
+ynh_add_config --template="../conf/backup" --destination="$install_dir/backup"
+ynh_add_config --template="../conf/backup_log" --destination="$install_dir/backup_log"
+ynh_add_config --template="../conf/check" --destination="$install_dir/check"
+ynh_add_config --template="../conf/check_log" --destination="$install_dir/check_log"
+ynh_add_config --template="../conf/check_method" --destination="$install_dir/check_method"
+
+# Fix permissions
+chown -R $app:$app "$install_dir"
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+
+# Create a dedicated systemd config
+ynh_add_systemd_config --service="$app-backup.service" --template="backup.service"
+ynh_add_config --template="../conf/backup.timer" --destination="/etc/systemd/system/$app-backup.timer"
+yunohost service add $app-backup --description="Run backup $app" --log="/var/log/$app/$app-backup.log"
+
+ynh_add_systemd_config --service="$app-check.service" --template="check.service"
+ynh_add_config --template="../conf/check.timer" --destination="/etc/systemd/system/$app-check.timer"
+yunohost service add $app-check --description="Check backup $app" --log="/var/log/$app/$app-check.log"
+
+ynh_add_systemd_config --service="$app-check-read-data.service" --template="check-read-data.service"
+ynh_add_config --template="../conf/check-read-data.timer" --destination="/etc/systemd/system/$app-check-read-data.timer"
+yunohost service add $app-check-read-data --description="Complete check backup $app" --log="/var/log/$app/$app-check-read-data.log"
+
+mkdir -p "/var/log/$app"
+chown $app:$app "/var/log/$app"
+
+ynh_add_config --template="../conf/sudoers" --destination="/etc/sudoers.d/$app"
+
+# Use logrotate to manage application logfile(s)
+ynh_use_logrotate
+
+#=================================================
+# APP INITIAL CONFIGURATION
+#=================================================
+# ADD A CONFIGURATION
+#=================================================
+#ynh_script_progression --message="Adding a configuration file..." --weight=1
+
+# ...
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting systemd timers..." --weight=1
+
+# Enable systemd timers
+systemctl enable --quiet --now $app-backup.timer
+systemctl enable --quiet --now $app-check.timer
+systemctl enable --quiet --now $app-check-read-data.timer
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+ynh_script_progression --message="Installation of $app completed" --last

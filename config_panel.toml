@@ -1,0 +1,63 @@
+version = "1.0"
+
+[main]
+
+    [main.backups]
+    name = "Backups"
+        [main.backups.apps]
+        ask.en = "Lists apps to backup (id)"
+        help.en = "Set to 'all' if you want to backup every apps"
+        type = "tags"
+        default = "all"
+
+        [main.backups.conf]
+        ask.en = "Backup system configuration?"
+        type = "boolean"
+        default = true
+
+        [main.backups.data]
+        ask.en = "Backup system and user data?"
+        type = "boolean"
+        default = true
+
+    [main.timers]
+    name = "Timers"
+        [main.timers.on_calendar]
+        services = ["__APP__-backup.timer "]
+        ask.en = "Backup timers"
+        type = "string"
+        bind = "OnCalendar:/etc/systemd/system/__APP__-backup.timer"
+        help = "Default (*-*-* 0:15:00) is on every day at 0:15 AM. See systemd OnCalendar format."
+        example = "*-*-* 0:15:00"
+        # FIXME: Validate OnCalendar format
+        #pattern.regexp = '^\w{3,30}$'
+        #pattern.error = "See systemd OnCalendar format."
+
+        [main.timers.check_on_calendar]
+        services = ["__APP__-check.timer "]
+        ask.en = "Metadata backup check timers"
+        type = "string"
+        bind = "OnCalendar:/etc/systemd/system/__APP__-check.timer"
+        help = "Default (Sat *-*-8..31 3:15:00) is on every Saturday exepct the first week of the month, at 3:15 AM. See systemd OnCalendar format."
+        example = "Sat *-*-8..31 3:15:00"
+        # FIXME: Validate OnCalendar format
+
+        [main.timers.check_read_data_on_calendar]
+        services = ["__APP__-check-read-data.timer "]
+        ask.en = "Complete backup check timers"
+        type = "string"
+        bind = "OnCalendar:/etc/systemd/system/__APP__-check-read-data.timer"
+        help = "Default (Sat *-*-1..7 3:15:00) is on the first Saturday of the month, at 3:15 AM. See systemd OnCalendar format."
+        example = "Sat *-*-1..7 3:15:00"
+        # FIXME: Validate OnCalendar format
+
+    [main.s3]
+        [main.s3.endpoint]
+        ask.en = "S3 Endpoint"
+        type = "string"
+        example = "s3.example.org"
+
+        [main.s3.bucket]
+        ask.en = "S3 Bucket"
+        type = "string"
+        example = "backups"
