@@ -14,4 +14,4 @@ else
   subject="${subject} (SUCCESS)"
 fi
 
-echo "${backup_results}" | mail -s "${subject}" root
+echo "${backup_results}" | sudo /usr/bin/mail -s "${subject}" root

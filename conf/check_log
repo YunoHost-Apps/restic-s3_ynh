@@ -69,4 +69,4 @@ fi
 
 parsed_log="$parsed_log\n\nTo get more detailed info check the log files /var/log/__APP__/check.log and /var/log/__APP__/check-err.log"
 
-echo -e "${parsed_log}" | mail -s "${subject}" root
+echo -e "${parsed_log}" | sudo /usr/bin/mail -s "${subject}" root

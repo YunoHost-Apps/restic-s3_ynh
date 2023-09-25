@@ -42,6 +42,7 @@ ynh_add_config --template="../conf/check_method" --destination="$install_dir/che
 
 # Fix permissions
 chown -R $app:$app "$install_dir"
+chmod u+x "$install_dir/*"
 
 #=================================================
 # SYSTEM CONFIGURATION
@@ -49,15 +50,15 @@ chown -R $app:$app "$install_dir"
 ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
 
 # Create a dedicated systemd config
-ynh_add_systemd_config --service="$app-backup.service" --template="backup.service"
+ynh_add_systemd_config --service="$app-backup" --template="backup.service"
 ynh_add_config --template="../conf/backup.timer" --destination="/etc/systemd/system/$app-backup.timer"
 yunohost service add $app-backup --description="Run backup $app" --log="/var/log/$app/$app-backup.log"
 
-ynh_add_systemd_config --service="$app-check.service" --template="check.service"
+ynh_add_systemd_config --service="$app-check" --template="check.service"
 ynh_add_config --template="../conf/check.timer" --destination="/etc/systemd/system/$app-check.timer"
 yunohost service add $app-check --description="Check backup $app" --log="/var/log/$app/$app-check.log"
 
-ynh_add_systemd_config --service="$app-check-read-data.service" --template="check-read-data.service"
+ynh_add_systemd_config --service="$app-check-read-data" --template="check-read-data.service"
 ynh_add_config --template="../conf/check-read-data.timer" --destination="/etc/systemd/system/$app-check-read-data.timer"
 yunohost service add $app-check-read-data --description="Complete check backup $app" --log="/var/log/$app/$app-check-read-data.log"
 
@@ -65,6 +66,7 @@ mkdir -p "/var/log/$app"
 chown $app:$app "/var/log/$app"
 
 ynh_add_config --template="../conf/sudoers" --destination="/etc/sudoers.d/$app"
+chown root:root "/etc/sudoers.d/$app"
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
